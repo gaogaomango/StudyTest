@@ -36,12 +36,12 @@ class RxJavaTest {
     @Test
     fun observable_error() {
         val errorObservable: Observable<RuntimeException>
-                = Observable.error(RuntimeException("Ooops!"))
+                = Observable.error(RuntimeException("Oops!"))
 
         errorObservable.test()
             .await()
             .assertNotComplete()
             .assertError(RuntimeException::class.java)
-            .assertErrorMessage("Ooops!")
+            .assertErrorMessage("Oops!")
     }
 }
