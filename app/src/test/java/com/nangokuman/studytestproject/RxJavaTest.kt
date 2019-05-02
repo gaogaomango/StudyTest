@@ -1,9 +1,11 @@
 package com.nangokuman.studytestproject
 
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.rxkotlin.toObservable
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Assert
 import org.junit.Test
+import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
 
 class RxJavaTest {
@@ -15,5 +17,31 @@ class RxJavaTest {
         subscriber.await()
             .assertComplete()
             .assertValue("Rx")
+    }
+
+    @Test
+    fun observable_values_test() {
+        val listObservable: Observable<String> = listOf("Giants", "Dodgers", "Athletics")
+            .toObservable()
+            .delay(1, TimeUnit.SECONDS)
+
+        val teams: List<String> = listObservable.test()
+            .await()
+            .assertComplete()
+            .values()
+
+        assertThat(teams).containsExactly("Giants", "Dodgers", "Athletics")
+    }
+
+    @Test
+    fun observable_error() {
+        val errorObservable: Observable<RuntimeException>
+                = Observable.error(RuntimeException("Ooops!"))
+
+        errorObservable.test()
+            .await()
+            .assertNotComplete()
+            .assertError(RuntimeException::class.java)
+            .assertErrorMessage("Ooops!")
     }
 }
