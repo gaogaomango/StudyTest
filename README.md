@@ -1,1 +1,1 @@
-"# StudyTest" 
+# StudyTest
