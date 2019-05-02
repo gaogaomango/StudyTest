@@ -17,7 +17,6 @@ class AsyncStringFetcherTest {
     @Before
     fun setUp() {
         fetcher = spy(StringFetcher())
-//        fetcher = spy()
         asyncFetcher = AsyncStringFetcher(fetcher)
         latch = CountDownLatch(1)
     }
@@ -89,6 +88,37 @@ class AsyncStringFetcherTest {
         )
         System.out.println("fetchAsync invoked.")
         latch.await()
+    }
+
+    @Test
+    fun fetchAsync_future_OK() {
+        var actualValue: String? = null
+        var actualError: Throwable? = null
+
+        asyncFetcher.fetchAsync(
+            {value -> actualValue = value},
+            {error -> actualError = error}
+            ).get()
+        verify(fetcher, times(1)).fetch()
+        assertThat(actualValue).isEqualTo("foo")
+        assertThat(actualError).isNull()
+    }
+
+    @Test
+    fun fetchAsync_future_NG() {
+        doThrow(RuntimeException("ERROR")).whenever(fetcher).fetch()
+        var actualValue: String? = null
+        var actualError: Throwable? = null
+
+        asyncFetcher.fetchAsync(
+            {value -> actualValue = value},
+            {error -> actualError = error}
+        ).get()
+        verify(fetcher, times(1)).fetch()
+        assertThat(actualValue).isNull()
+        assertThat(actualError)
+            .isExactlyInstanceOf(RuntimeException::class.java)
+            .hasMessage("ERROR")
     }
 
 }
